@@ -111,13 +111,13 @@
       letter-spacing: 0.02em;
     }
     .hero-eyebrow {
-      font-size: clamp(0.65rem, 2.5vw, 0.75rem);
-      letter-spacing: 0.05em;
+      font-size: clamp(0.7rem, 2.8vw, 0.75rem);
+      letter-spacing: 0.03em;
       color: var(--blue-mid);
       margin-bottom: 1.4rem;
       display: flex; align-items: center; justify-content: center; gap: 0.5rem;
       font-weight: 700;
-      white-space: normal;
+      white-space: nowrap;
       text-align: center;
     }
     .hero-eyebrow::before {
@@ -167,13 +167,16 @@
       border-radius: 2px;
     }
     .hero p {
-      font-size: clamp(0.85rem, 3vw, 1rem);
+      font-size: clamp(0.8rem, 3.2vw, 1rem);
       color: #4A6080;
       line-height: 1.9;
       margin-bottom: 2.5rem;
       max-width: 560px;
       text-align: center;
-      padding: 0 0.5rem;
+      padding: 0 1rem;
+      width: 100%;
+      word-break: keep-all;
+      overflow-wrap: break-word;
     }
     .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
     .btn-primary {
@@ -593,14 +596,13 @@
     <div class="hero-brand">
       <span class="hero-brand-n">N</span><span class="hero-brand-sup">サポート</span>
     </div>
-    <p class="hero-eyebrow">清掃・工事・ビルメンテナンス専門コンサルタント</p>
+    <p class="hero-eyebrow">清掃・工事・ビルメン専門コンサルタント</p>
     <h1>
       <span class="h1-line1">売上・人材・仕組み——</span>
       <span class="h1-line2">現場の悩みを、<em>一緒に解決する</em></span>
     </h1>
     <p>
-      清掃・工事・ビルメン業界の経営者・職人を全力サポート。<br>
-      現場を知るコンサルタントが、あなたのそばで伴走します。
+      清掃・工事・ビルメン業界の経営者・職人を全力サポート。<br>現場を知るコンサルタントが、あなたのそばで伴走します。
     </p>
     <div class="hero-btns">
       <a href="#contact" class="btn-primary">無料相談を予約する</a>
