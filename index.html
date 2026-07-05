@@ -74,7 +74,7 @@
       background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 40%, #E1F5FE 100%);
       display: flex; align-items: center; justify-content: center;
       position: relative; overflow: hidden;
-      padding: 0 6%;
+      padding: 0 4%;
       text-align: center;
     }
     .hero-circle-1 {
@@ -97,7 +97,7 @@
     }
     .hero-brand-n {
       font-family: 'Noto Serif JP', serif;
-      font-size: clamp(2.8rem, 6vw, 4.5rem);
+      font-size: clamp(2.2rem, 10vw, 4.5rem);
       font-weight: 700;
       color: #2196F3;
       line-height: 1;
@@ -105,19 +105,20 @@
     }
     .hero-brand-sup {
       font-family: 'Noto Serif JP', serif;
-      font-size: clamp(2.8rem, 6vw, 4.5rem);
+      font-size: clamp(2.2rem, 10vw, 4.5rem);
       font-weight: 700;
       color: #1565C0;
       letter-spacing: 0.02em;
     }
     .hero-eyebrow {
-      font-size: 0.75rem;
-      letter-spacing: 0.1em;
+      font-size: clamp(0.65rem, 2.5vw, 0.75rem);
+      letter-spacing: 0.05em;
       color: var(--blue-mid);
       margin-bottom: 1.4rem;
-      display: flex; align-items: center; justify-content: center; gap: 0.8rem;
+      display: flex; align-items: center; justify-content: center; gap: 0.5rem;
       font-weight: 700;
-      white-space: nowrap;
+      white-space: normal;
+      text-align: center;
     }
     .hero-eyebrow::before {
       content: '';
@@ -127,12 +128,13 @@
     }
     .hero h1 {
       font-family: 'Noto Serif JP', serif;
-      font-size: clamp(1.5rem, 3.2vw, 2.8rem);
+      font-size: clamp(1.3rem, 4.5vw, 2.8rem);
       font-weight: 700;
       color: var(--blue-dark);
-      line-height: 1.35;
+      line-height: 1.4;
       margin-bottom: 1.4rem;
-      white-space: nowrap;
+      white-space: normal;
+      word-break: keep-all;
     }
     .hero h1 em {
       font-style: normal;
@@ -147,12 +149,13 @@
       border-radius: 2px;
     }
     .hero p {
-      font-size: 1rem;
+      font-size: clamp(0.85rem, 3vw, 1rem);
       color: #4A6080;
       line-height: 1.9;
       margin-bottom: 2.5rem;
       max-width: 560px;
       text-align: center;
+      padding: 0 0.5rem;
     }
     .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
     .btn-primary {
@@ -535,7 +538,7 @@
     /* ── MOBILE ── */
     @media (max-width: 768px) {
       .nav-links { display: none; }
-      .hero { min-height: auto; padding: 6rem 6% 4rem; }
+      .hero { min-height: auto; padding: 6rem 4% 4rem; }
       .hero-stats { gap: 1rem; }
       .stat { padding: 0.8rem 1rem; }
       .service-item { grid-template-columns: 48px 1fr; }
