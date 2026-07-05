@@ -128,14 +128,20 @@
     }
     .hero h1 {
       font-family: 'Noto Serif JP', serif;
-      font-size: clamp(1.1rem, 4.2vw, 2.8rem);
+      font-size: clamp(0.95rem, 3.8vw, 2.8rem);
       font-weight: 700;
       color: var(--blue-dark);
-      line-height: 1.5;
+      line-height: 1.6;
       margin-bottom: 1.4rem;
       white-space: normal;
       word-break: keep-all;
       width: 100%;
+      padding: 0 0.5rem;
+    }
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 1.15rem;
+      }
     }
     .hero h1 em {
       font-style: normal;
