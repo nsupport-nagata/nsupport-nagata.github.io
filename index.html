@@ -167,7 +167,7 @@
       border-radius: 2px;
     }
     .hero p {
-      font-size: clamp(0.8rem, 3.2vw, 1rem);
+      font-size: 0.82rem;
       color: #4A6080;
       line-height: 1.9;
       margin-bottom: 2.5rem;
@@ -175,8 +175,13 @@
       text-align: center;
       padding: 0 1rem;
       width: 100%;
-      word-break: keep-all;
-      overflow-wrap: break-word;
+    }
+    @media (max-width: 480px) {
+      .hero p {
+        font-size: 0.75rem;
+        padding: 0 0.5rem;
+        line-height: 1.8;
+      }
     }
     .hero-btns { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
     .btn-primary {
