@@ -1,0 +1,19 @@
+name: Keep Supabase Alive
+
+# 毎日1回、UTC 0時(日本時間 朝9時)に自動実行されます
+# 加えて、手動で今すぐ実行したい場合は workflow_dispatch で実行可能です
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase project to prevent auto-pause
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" \
+            "${{ secrets.SUPABASE_URL }}/rest/v1/" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
