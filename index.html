@@ -945,5 +945,196 @@
     }
   }
 </script>
+
+<script>
+// Supabaseから設定を読み込んでHPに反映
+const SUPABASE_URL = 'https://cwyyjsdsbnigysotlnph.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3eXlqc2RzYm5pZ3lzb3RsbnBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0ODc1NDMsImV4cCI6MjA5ODA2MzU0M30.dHeQnNhj2N5PPTs773zGU8YhlQPVIK8Sp5DEtHP7d74';
+
+async function loadFromSupabase() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/site_settings?select=id,value`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!Array.isArray(data)) return;
+
+    const s = {};
+    data.forEach(row => s[row.id] = row.value);
+
+    // ロゴ
+    if (s.logo) {
+      document.querySelectorAll('.hero-brand-sup').forEach(el => el.textContent = s.logo);
+      document.querySelectorAll('.footer-logo').forEach(el => el.innerHTML = s.logo);
+      document.querySelector('.logo') && (document.querySelector('.logo').innerHTML = s.logo.charAt(0) + '<span>' + s.logo.slice(1) + '</span>');
+    }
+
+    // キャッチコピー
+    const h1 = document.querySelector('.hero h1');
+    if (h1 && (s.catch1 || s.catch2)) {
+      const line1 = s.catch1 || '';
+      const line2 = s.catch2 || '';
+      h1.innerHTML = `<span class="h1-line1">${line1}</span><span class="h1-line2"><em>${line2}</em></span>`;
+    }
+
+    // サブテキスト
+    const sub = document.querySelector('.hero p');
+    if (sub && s.subtext) {
+      sub.innerHTML = s.subtext.replace(/。/g, '。<br>');
+    }
+
+    // ボタン
+    const btns = document.querySelectorAll('.hero-btns a');
+    if (btns[0] && s.btn1) btns[0].textContent = s.btn1;
+    if (btns[1] && s.btn2) btns[1].textContent = s.btn2;
+
+    // 統計カード
+    const statNums = document.querySelectorAll('.stat-num');
+    const statLabels = document.querySelectorAll('.stat-label');
+    if (statNums[0] && s.stat1_num) statNums[0].innerHTML = s.stat1_num + '<span></span>';
+    if (statLabels[0] && s.stat1_label) statLabels[0].textContent = s.stat1_label;
+    if (statNums[1] && s.stat2_num) statNums[1].innerHTML = s.stat2_num + '<span></span>';
+    if (statLabels[1] && s.stat2_label) statLabels[1].textContent = s.stat2_label;
+
+    // テーマカラー
+    if (s.main_color) {
+      document.documentElement.style.setProperty('--blue-mid', s.main_color);
+      document.documentElement.style.setProperty('--blue-dark', s.main_color);
+    }
+    if (s.accent_color) {
+      document.documentElement.style.setProperty('--accent', s.accent_color);
+    }
+
+    // プロフィール
+    if (s.prof_name) {
+      const nameEl = document.querySelector('.profile-name');
+      if (nameEl) nameEl.textContent = s.prof_name;
+    }
+    if (s.prof_kana) {
+      const kanaEl = document.querySelector('.profile-kana');
+      if (kanaEl) kanaEl.textContent = s.prof_kana;
+    }
+    if (s.prof_title) {
+      const titleEl = document.querySelector('.profile-title');
+      if (titleEl) titleEl.textContent = s.prof_title;
+    }
+    if (s.prof_bio) {
+      const bioEl = document.querySelector('.profile-bio');
+      if (bioEl) bioEl.innerHTML = s.prof_bio.replace(/\n/g, '<br>');
+    }
+    if (s.prof_photo) {
+      const imgEl = document.querySelector('.profile-img-wrap img');
+      if (imgEl) imgEl.src = s.prof_photo;
+    }
+
+    // 課題カード
+    const probCards = document.querySelectorAll('#problems .problem-card');
+    probCards.forEach((card, i) => {
+      const t = s[`prob_title_${i}`];
+      const d = s[`prob_desc_${i}`];
+      if (t) card.querySelector('h3') && (card.querySelector('h3').textContent = t);
+      if (d) card.querySelector('p') && (card.querySelector('p').textContent = d);
+    });
+
+    // サービスカード
+    const svcItems = document.querySelectorAll('.service-item');
+    svcItems.forEach((item, i) => {
+      const n = s[`svc_name_${i}`];
+      const d = s[`svc_desc_${i}`];
+      if (n) item.querySelector('h3') && (item.querySelector('h3').textContent = n);
+      if (d) item.querySelector('p') && (item.querySelector('p').textContent = d);
+    });
+
+  } catch(e) {
+    console.log('Supabase load error:', e);
+  }
+}
+
+// お知らせ・コラムを読み込む
+async function loadNews() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/news?order=created_at.desc&limit=5`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) return;
+
+    // お知らせセクションが存在すれば表示
+    let section = document.getElementById('news-section');
+    if (!section) {
+      section = document.createElement('section');
+      section.id = 'news-section';
+      section.style.cssText = 'padding:4rem 6%;background:#F5F8FC;';
+      section.innerHTML = `
+        <p style="font-size:0.7rem;letter-spacing:0.25em;color:var(--blue-mid);margin-bottom:0.8rem;font-weight:700;">お知らせ</p>
+        <h2 style="font-family:Noto Serif JP,serif;font-size:clamp(1.6rem,3vw,2.3rem);font-weight:700;color:var(--blue-dark);margin-bottom:2rem;">最新のお知らせ</h2>
+        <div id="news-list"></div>
+      `;
+      const contact = document.getElementById('contact');
+      if (contact) contact.parentNode.insertBefore(section, contact);
+    }
+
+    const list = document.getElementById('news-list');
+    if (list) {
+      list.innerHTML = data.map(n => `
+        <div style="background:#fff;border:1px solid #E8EFF8;border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.75rem;">
+          <div style="font-size:0.75rem;color:#78909C;margin-bottom:0.3rem;">${new Date(n.created_at).toLocaleDateString('ja-JP')}</div>
+          <div style="font-size:0.95rem;font-weight:500;color:#1A2E44;margin-bottom:0.3rem;">${n.title}</div>
+          <div style="font-size:0.85rem;color:#78909C;line-height:1.7;">${n.body || ''}</div>
+        </div>
+      `).join('');
+    }
+  } catch(e) {
+    console.log('News load error:', e);
+  }
+}
+
+async function loadColumns() {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/columns?order=created_at.desc&limit=5`, {
+      headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    if (!Array.isArray(data) || data.length === 0) return;
+
+    let section = document.getElementById('column-section');
+    if (!section) {
+      section = document.createElement('section');
+      section.id = 'column-section';
+      section.style.cssText = 'padding:4rem 6%;background:#fff;';
+      section.innerHTML = `
+        <p style="font-size:0.7rem;letter-spacing:0.25em;color:var(--blue-mid);margin-bottom:0.8rem;font-weight:700;">コラム</p>
+        <h2 style="font-family:Noto Serif JP,serif;font-size:clamp(1.6rem,3vw,2.3rem);font-weight:700;color:var(--blue-dark);margin-bottom:2rem;">コラム・お役立ち情報</h2>
+        <div id="column-list"></div>
+      `;
+      const contact = document.getElementById('contact');
+      if (contact) contact.parentNode.insertBefore(section, contact);
+    }
+
+    const list = document.getElementById('column-list');
+    if (list) {
+      list.innerHTML = data.map(c => `
+        <div style="background:#F5F8FC;border:1px solid #E8EFF8;border-radius:10px;padding:1rem 1.25rem;margin-bottom:0.75rem;">
+          <div style="font-size:0.75rem;color:#78909C;margin-bottom:0.3rem;">${new Date(c.created_at).toLocaleDateString('ja-JP')}</div>
+          <div style="font-size:0.95rem;font-weight:500;color:#1A2E44;margin-bottom:0.5rem;">${c.title}</div>
+          <div style="font-size:0.85rem;color:#78909C;line-height:1.7;">${(c.body || '').slice(0,120)}${(c.body||'').length>120?'...':''}</div>
+        </div>
+      `).join('');
+    }
+  } catch(e) {
+    console.log('Column load error:', e);
+  }
+}
+
+// ページ読み込み時に実行
+window.addEventListener('DOMContentLoaded', () => {
+  loadFromSupabase();
+  loadNews();
+  loadColumns();
+});
+</script>
 </body>
 </html>
