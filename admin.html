@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nサポート 管理画面</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #1976D2;
+      --blue-dark: #1565C0;
+      --blue-light: #E3F2FD;
+      --gray-100: #F5F8FC;
+      --gray-200: #E8EFF8;
+      --gray-500: #78909C;
+      --text: #1A2E44;
+      --white: #fff;
+      --danger: #E53935;
+      --danger-bg: #FFEBEE;
+      --success: #0E7C7B;
+    }
+    body { font-family: 'Noto Sans JP', sans-serif; color: var(--text); background: var(--gray-100); margin: 0; }
+
+    /* ログイン画面 */
+    .login-wrap { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg,#E3F2FD,#BBDEFB); }
+    .login-card { background: #fff; border-radius: 16px; padding: 2.5rem; width: 340px; box-shadow: 0 8px 32px rgba(33,150,243,0.12); }
+    .login-logo { font-size: 1.8rem; font-weight: 700; color: var(--blue-dark); text-align: center; margin-bottom: 0.25rem; }
+    .login-sub { font-size: 0.8rem; color: var(--gray-500); text-align: center; margin-bottom: 2rem; }
+    .login-label { font-size: 0.78rem; color: var(--gray-500); font-weight: 500; margin-bottom: 4px; display: block; }
+    .login-input { width: 100%; padding: 0.7rem 1rem; border: 1.5px solid var(--gray-200); border-radius: 10px; font-family: 'Noto Sans JP',sans-serif; font-size: 0.9rem; margin-bottom: 1rem; outline: none; }
+    .login-input:focus { border-color: var(--blue); }
+    .login-btn { width: 100%; padding: 0.85rem; background: var(--blue); color: #fff; border: none; border-radius: 24px; font-family: 'Noto Sans JP',sans-serif; font-weight: 700; font-size: 0.95rem; cursor: pointer; }
+    .login-btn:hover { background: var(--blue-dark); }
+    .login-error { color: var(--danger); font-size: 0.8rem; text-align: center; margin-top: 0.5rem; display: none; }
+
+    /* メイン管理画面 */
+    .admin-wrap { display: none; }
+    .admin-header { background: #fff; border-bottom: 1px solid var(--gray-200); padding: 0.75rem 1.5rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+    .admin-logo { font-size: 1.1rem; font-weight: 700; color: var(--blue-dark); }
+    .admin-logo span { color: #29B6F6; }
+    .logout-btn { font-size: 0.8rem; color: var(--gray-500); background: none; border: 1px solid var(--gray-200); border-radius: 20px; padding: 0.3rem 0.9rem; cursor: pointer; }
+    .logout-btn:hover { background: var(--gray-100); }
+
+    .admin-body { display: flex; min-height: calc(100vh - 52px); }
+    .sidebar { width: 200px; background: #fff; border-right: 1px solid var(--gray-200); padding: 1rem 0; flex-shrink: 0; }
+    .nav-group { font-size: 10px; color: var(--gray-500); padding: 0.5rem 1rem 0.2rem; letter-spacing: 0.08em; text-transform: uppercase; }
+    .nav-item { display: flex; align-items: center; gap: 8px; padding: 0.4rem 1rem; font-size: 0.83rem; color: var(--gray-500); cursor: pointer; border-left: 3px solid transparent; }
+    .nav-item:hover { background: var(--gray-100); color: var(--text); }
+    .nav-item.active { background: var(--blue-light); color: var(--blue); border-left-color: var(--blue); font-weight: 500; }
+
+    .main-content { flex: 1; padding: 1.5rem; max-width: 800px; }
+    .panel { display: none; }
+    .panel.active { display: block; }
+    .panel-title { font-size: 1.1rem; font-weight: 700; color: var(--text); margin-bottom: 1.25rem; padding-bottom: 0.75rem; border-bottom: 1px solid var(--gray-200); }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-label { font-size: 0.78rem; color: var(--gray-500); font-weight: 500; margin-bottom: 4px; display: block; }
+    .form-input { width: 100%; padding: 0.6rem 0.85rem; border: 1.5px solid var(--gray-200); border-radius: 8px; font-family: 'Noto Sans JP',sans-serif; font-size: 0.88rem; outline: none; background: var(--white); color: var(--text); }
+    .form-input:focus { border-color: var(--blue); }
+    textarea.form-input { resize: vertical; min-height: 80px; }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .save-btn { background: var(--blue); color: #fff; border: none; border-radius: 20px; padding: 0.6rem 1.5rem; font-family: 'Noto Sans JP',sans-serif; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+    .save-btn:hover { background: var(--blue-dark); }
+
+    .section-divider { border: none; border-top: 1px solid var(--gray-200); margin: 1.25rem 0; }
+    .section-sub { font-size: 0.75rem; font-weight: 500; color: var(--gray-500); background: var(--gray-100); border-radius: 6px; padding: 0.2rem 0.7rem; margin-bottom: 0.75rem; display: inline-block; }
+
+    /* お知らせ・コラム */
+    .add-form { background: #fff; border: 1.5px solid var(--blue-light); border-radius: 12px; padding: 1.25rem; margin-bottom: 1rem; display: none; }
+    .add-form.open { display: block; }
+    .add-form-btn { display: inline-flex; align-items: center; gap: 6px; padding: 0.5rem 1.2rem; background: var(--blue-light); color: var(--blue); border: none; border-radius: 20px; font-family: 'Noto Sans JP',sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; margin-bottom: 1rem; }
+    .add-form-btn:hover { background: #BBDEFB; }
+    .item-card { background: #fff; border: 1px solid var(--gray-200); border-radius: 10px; padding: 1rem 1.25rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+    .item-card-body h4 { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-bottom: 0.3rem; }
+    .item-card-body p { font-size: 0.8rem; color: var(--gray-500); line-height: 1.6; }
+    .item-card-date { font-size: 0.75rem; color: var(--gray-500); margin-top: 0.3rem; }
+    .del-btn { background: var(--danger-bg); color: var(--danger); border: none; border-radius: 6px; padding: 0.3rem 0.7rem; font-size: 0.75rem; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+    .del-btn:hover { background: #FFCDD2; }
+    .empty-msg { text-align: center; color: var(--gray-500); font-size: 0.85rem; padding: 2rem; background: #fff; border-radius: 10px; border: 1px solid var(--gray-200); }
+
+    /* カラー */
+    .color-row { display: flex; align-items: center; gap: 0.75rem; }
+    .color-swatch { width: 28px; height: 28px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; flex-shrink: 0; }
+    .color-swatch.sel { border-color: var(--text); }
+
+    /* トースト */
+    .toast { position: fixed; bottom: 1.5rem; right: 1.5rem; background: var(--success); color: #fff; padding: 0.6rem 1.25rem; border-radius: 20px; font-size: 0.85rem; display: none; align-items: center; gap: 8px; z-index: 100; box-shadow: 0 4px 16px rgba(0,0,0,0.15); }
+    .toast.show { display: flex; }
+
+    /* カラー設定 */
+    input[type=color] { width: 40px; height: 32px; border: 1px solid var(--gray-200); border-radius: 6px; cursor: pointer; padding: 2px; }
+
+    @media (max-width: 768px) {
+      .admin-body { flex-direction: column; }
+      .sidebar { width: 100%; border-right: none; border-bottom: 1px solid var(--gray-200); padding: 0.5rem 0; display: flex; flex-wrap: wrap; gap: 0; }
+      .nav-group { display: none; }
+      .nav-item { padding: 0.4rem 0.75rem; font-size: 0.78rem; border-left: none; border-bottom: 2px solid transparent; }
+      .nav-item.active { border-bottom-color: var(--blue); border-left-color: transparent; }
+      .main-content { padding: 1rem; }
+      .row2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ログイン画面 -->
+<div class="login-wrap" id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">Nサポート</div>
+    <div class="login-sub">管理画面ログイン</div>
+    <label class="login-label">パスワード</label>
+    <input type="password" class="login-input" id="pw-input" placeholder="パスワードを入力" onkeydown="if(event.key==='Enter')login()">
+    <button class="login-btn" onclick="login()">ログイン</button>
+    <div class="login-error" id="login-error">パスワードが違います</div>
+  </div>
+</div>
+
+<!-- 管理画面 -->
+<div class="admin-wrap" id="admin-screen">
+  <div class="admin-header">
+    <div class="admin-logo">N<span>サポート</span> 管理画面</div>
+    <button class="logout-btn" onclick="logout()">ログアウト</button>
+  </div>
+  <div class="admin-body">
+    <div class="sidebar">
+      <div class="nav-group">内容編集</div>
+      <div class="nav-item active" onclick="show('top',this)">🏠 トップ</div>
+      <div class="nav-item" onclick="show('profile',this)">👤 プロフィール</div>
+      <div class="nav-item" onclick="show('contact',this)">✉️ お問い合わせ</div>
+      <div class="nav-group">セクション</div>
+      <div class="nav-item" onclick="show('problem',this)">⚠️ 課題</div>
+      <div class="nav-item" onclick="show('service',this)">💼 サービス</div>
+      <div class="nav-item" onclick="show('flow',this)">📋 サポートの流れ</div>
+      <div class="nav-item" onclick="show('aidx',this)">🤖 AI・DX</div>
+      <div class="nav-group">コンテンツ</div>
+      <div class="nav-item" onclick="show('news',this)">🔔 お知らせ</div>
+      <div class="nav-item" onclick="show('column',this)">📝 コラム</div>
+      <div class="nav-group">デザイン</div>
+      <div class="nav-item" onclick="show('design',this)">🎨 カラー・文字</div>
+      <div class="nav-item" onclick="show('photo',this)">🖼️ 写真</div>
+    </div>
+
+    <div class="main-content">
+
+      <!-- トップ -->
+      <div class="panel active" id="panel-top">
+        <div class="panel-title">トップページ</div>
+        <div class="form-group"><label class="form-label">屋号（ロゴ）</label><input class="form-input" id="logo" type="text"></div>
+        <div class="form-group"><label class="form-label">専門ラベル</label><input class="form-input" id="label" type="text"></div>
+        <div class="form-group"><label class="form-label">キャッチコピー 1行目</label><input class="form-input" id="catch1" type="text"></div>
+        <div class="form-group"><label class="form-label">キャッチコピー 2行目</label><input class="form-input" id="catch2" type="text"></div>
+        <div class="form-group"><label class="form-label">サブテキスト</label><textarea class="form-input" id="subtext"></textarea></div>
+        <div class="row2">
+          <div class="form-group"><label class="form-label">ボタン①</label><input class="form-input" id="btn1" type="text"></div>
+          <div class="form-group"><label class="form-label">ボタン②</label><input class="form-input" id="btn2" type="text"></div>
+        </div>
+        <hr class="section-divider">
+        <div class="section-sub">統計カード</div>
+        <div class="row2">
+          <div class="form-group"><label class="form-label">統計①数値</label><input class="form-input" id="stat1_num" type="text"></div>
+          <div class="form-group"><label class="form-label">統計①ラベル</label><input class="form-input" id="stat1_label" type="text"></div>
+        </div>
+        <div class="row2">
+          <div class="form-group"><label class="form-label">統計②数値</label><input class="form-input" id="stat2_num" type="text"></div>
+          <div class="form-group"><label class="form-label">統計②ラベル</label><input class="form-input" id="stat2_label" type="text"></div>
+        </div>
+        <button class="save-btn" onclick="saveSettings(['logo','label','catch1','catch2','subtext','btn1','btn2','stat1_num','stat1_label','stat2_num','stat2_label'])">✓ 保存する</button>
+      </div>
+
+      <!-- プロフィール -->
+      <div class="panel" id="panel-profile">
+        <div class="panel-title">プロフィール</div>
+        <div class="row2">
+          <div class="form-group"><label class="form-label">氏名</label><input class="form-input" id="prof_name" type="text"></div>
+          <div class="form-group"><label class="form-label">ふりがな</label><input class="form-input" id="prof_kana" type="text"></div>
+        </div>
+        <div class="form-group"><label class="form-label">肩書き</label><input class="form-input" id="prof_title" type="text"></div>
+        <div class="form-group"><label class="form-label">プロフィール文</label><textarea class="form-input" id="prof_bio" style="min-height:140px;"></textarea></div>
+        <button class="save-btn" onclick="saveSettings(['prof_name','prof_kana','prof_title','prof_bio'])">✓ 保存する</button>
+      </div>
+
+      <!-- お問い合わせ -->
+      <div class="panel" id="panel-contact">
+        <div class="panel-title">お問い合わせ</div>
+        <div class="form-group"><label class="form-label">セクションタイトル</label><input class="form-input" id="contact_title" type="text"></div>
+        <div class="form-group"><label class="form-label">説明文</label><textarea class="form-input" id="contact_sub"></textarea></div>
+        <div class="form-group"><label class="form-label">送信先メールアドレス</label><input class="form-input" id="contact_email" type="email"></div>
+        <div class="form-group"><label class="form-label">送信後メッセージ</label><input class="form-input" id="contact_msg" type="text"></div>
+        <button class="save-btn" onclick="saveSettings(['contact_title','contact_sub','contact_email','contact_msg'])">✓ 保存する</button>
+      </div>
+
+      <!-- 課題 -->
+      <div class="panel" id="panel-problem">
+        <div class="panel-title">課題セクション</div>
+        <div class="form-group"><label class="form-label">セクションタイトル</label><input class="form-input" id="problem_title" type="text"></div>
+        <div class="form-group"><label class="form-label">説明文</label><textarea class="form-input" id="problem_sub"></textarea></div>
+        <hr class="section-divider">
+        <div class="section-sub">課題カード（文言のみ変更可）</div>
+        <div id="problem-cards"></div>
+        <button class="save-btn" onclick="saveProblemCards()">✓ 保存する</button>
+      </div>
+
+      <!-- サービス -->
+      <div class="panel" id="panel-service">
+        <div class="panel-title">サービス内容</div>
+        <div class="form-group"><label class="form-label">セクションタイトル</label><input class="form-input" id="service_title" type="text"></div>
+        <hr class="section-divider">
+        <div class="section-sub">サービス項目（文言のみ変更可）</div>
+        <div id="service-cards"></div>
+        <button class="save-btn" onclick="saveServiceCards()">✓ 保存する</button>
+      </div>
+
+      <!-- サポートの流れ -->
+      <div class="panel" id="panel-flow">
+        <div class="panel-title">サポートの流れ</div>
+        <div class="form-group"><label class="form-label">セクションタイトル</label><input class="form-input" id="flow_title" type="text"></div>
+        <div class="form-group"><label class="form-label">説明文</label><textarea class="form-input" id="flow_sub"></textarea></div>
+        <hr class="section-divider">
+        <div class="section-sub">ステップ（文言のみ変更可）</div>
+        <div id="flow-cards"></div>
+        <button class="save-btn" onclick="saveFlowCards()">✓ 保存する</button>
+      </div>
+
+      <!-- AI・DX -->
+      <div class="panel" id="panel-aidx">
+        <div class="panel-title">AI・DXセクション</div>
+        <div class="form-group"><label class="form-label">セクションタイトル</label><input class="form-input" id="aidx_title" type="text"></div>
+        <div class="form-group"><label class="form-label">説明文</label><textarea class="form-input" id="aidx_sub"></textarea></div>
+        <hr class="section-divider">
+        <div class="section-sub">カード（文言のみ変更可）</div>
+        <div id="aidx-cards"></div>
+        <button class="save-btn" onclick="saveAidxCards()">✓ 保存する</button>
+      </div>
+
+      <!-- お知らせ -->
+      <div class="panel" id="panel-news">
+        <div class="panel-title">お知らせ管理</div>
+        <button class="add-form-btn" onclick="toggleForm('news-form')">＋ 新規追加</button>
+        <div class="add-form" id="news-form">
+          <div class="form-group"><label class="form-label">タイトル</label><input class="form-input" id="news-title" type="text" placeholder="お知らせのタイトル"></div>
+          <div class="form-group"><label class="form-label">内容</label><textarea class="form-input" id="news-body" placeholder="内容を入力"></textarea></div>
+          <div style="display:flex;gap:0.75rem;">
+            <button class="save-btn" onclick="addNews()">✓ 追加</button>
+            <button class="save-btn" style="background:var(--gray-500);" onclick="toggleForm('news-form')">キャンセル</button>
+          </div>
+        </div>
+        <div id="news-list"></div>
+      </div>
+
+      <!-- コラム -->
+      <div class="panel" id="panel-column">
+        <div class="panel-title">コラム管理</div>
+        <button class="add-form-btn" onclick="toggleForm('col-form')">＋ 新規追加</button>
+        <div class="add-form" id="col-form">
+          <div class="form-group"><label class="form-label">タイトル</label><input class="form-input" id="col-title" type="text" placeholder="コラムのタイトル"></div>
+          <div class="form-group"><label class="form-label">本文</label><textarea class="form-input" id="col-body" placeholder="内容を入力" style="min-height:100px;"></textarea></div>
+          <div style="display:flex;gap:0.75rem;">
+            <button class="save-btn" onclick="addColumn()">✓ 追加</button>
+            <button class="save-btn" style="background:var(--gray-500);" onclick="toggleForm('col-form')">キャンセル</button>
+          </div>
+        </div>
+        <div id="col-list"></div>
+      </div>
+
+      <!-- デザイン -->
+      <div class="panel" id="panel-design">
+        <div class="panel-title">カラー・文字設定</div>
+        <div class="section-sub">テーマカラー</div>
+        <div class="form-group">
+          <label class="form-label">メインカラー</label>
+          <div class="color-row">
+            <input type="color" id="main_color" value="#1976D2">
+            <div class="color-swatch sel" style="background:#1976D2;" onclick="setColor('#1976D2')"></div>
+            <div class="color-swatch" style="background:#0E7C7B;" onclick="setColor('#0E7C7B')"></div>
+            <div class="color-swatch" style="background:#2E7D32;" onclick="setColor('#2E7D32')"></div>
+            <div class="color-swatch" style="background:#6A1B9A;" onclick="setColor('#6A1B9A')"></div>
+            <div class="color-swatch" style="background:#C62828;" onclick="setColor('#C62828')"></div>
+            <div class="color-swatch" style="background:#1A2332;" onclick="setColor('#1A2332')"></div>
+            <div class="color-swatch" style="background:#E65100;" onclick="setColor('#E65100')"></div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">アクセントカラー（ボタン）</label>
+          <input type="color" id="accent_color" value="#FF7043">
+        </div>
+        <hr class="section-divider">
+        <div class="section-sub">フォント設定</div>
+        <div class="form-group">
+          <label class="form-label">見出しフォント</label>
+          <select class="form-input" id="heading_font">
+            <option value="Noto Serif JP">Noto Serif JP（明朝・信頼感）</option>
+            <option value="Noto Sans JP">Noto Sans JP（ゴシック・モダン）</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">見出しの太さ</label>
+          <select class="form-input" id="heading_weight">
+            <option value="400">細め（400）</option>
+            <option value="600">やや太め（600）</option>
+            <option value="700" selected>太め（700）</option>
+          </select>
+        </div>
+        <button class="save-btn" onclick="saveSettings(['main_color','accent_color','heading_font','heading_weight'])">✓ 保存する</button>
+      </div>
+
+      <!-- 写真 -->
+      <div class="panel" id="panel-photo">
+        <div class="panel-title">写真管理</div>
+        <p style="font-size:0.85rem;color:var(--gray-500);margin-bottom:1.5rem;line-height:1.8;">写真はBase64形式でSupabaseに保存されます。<br>※ファイルサイズが大きい場合は圧縮してからアップロードしてください。</p>
+        <div class="section-sub">プロフィール写真</div>
+        <input type="file" id="prof-img-input" accept="image/*" onchange="uploadPhoto(this,'prof_photo')" style="margin-bottom:1rem;">
+        <div id="prof-photo-preview" style="margin-bottom:1.5rem;"></div>
+        <hr class="section-divider">
+        <div class="section-sub">トップページ背景写真</div>
+        <input type="file" id="top-img-input" accept="image/*" onchange="uploadPhoto(this,'top_photo')">
+        <div id="top-photo-preview" style="margin-top:0.5rem;"></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast">✓ <span id="toast-msg">保存しました</span></div>
+
+<script>
+const SUPABASE_URL = 'https://cwyyjsdsbnigysotlnph.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3eXlqc2RzYm5pZ3lzb3RsbnBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0ODc1NDMsImV4cCI6MjA5ODA2MzU0M30.dHeQnNhj2N5PPTs773zGU8YhlQPVIK8Sp5DEtHP7d74';
+const ADMIN_PASSWORD = 'Nsupport2024';
+
+// 初期データ
+const problemData = [
+  {title:'受注金額が上がらず利益率が低いまま', desc:'価格交渉のノウハウがなく、元請けや発注者に言われるまま受注してしまっている。'},
+  {title:'人員の離職が多く組織が安定しない', desc:'採用してもすぐ辞めてしまう。マネジメントや評価制度が機能していない。'},
+  {title:'業務が属人化していて仕組みがない', desc:'特定の担当者しかわからない業務が多く、ミスや引き継ぎトラブルが絶えない。'},
+  {title:'AI・DXに乗り遅れて競合に差をつけられる不安', desc:'業務効率化をしたいが、何から始めればいいかわからない。'},
+  {title:'組織拡大に向けた体制づくりができない', desc:'事業を伸ばしたいが、管理職の育成や権限委譲の方法がわからない。'}
+];
+const serviceData = [
+  {num:'01', name:'営業支援・受注力強化', desc:'営業戦略立案、提案書・見積書の強化、商談同席サポートまで包括的に支援します。'},
+  {num:'02', name:'価格交渉・収益改善サポート', desc:'発注者との価格交渉戦略の立案、適正単価の算出、粗利改善のための顧客管理。'},
+  {num:'03', name:'業務効率化・標準化', desc:'現場作業の手順書作成、業務フロー整備、ムダの削減により生産性を向上させます。'},
+  {num:'04', name:'AI・DX化推進', desc:'顧客管理や業務の調整、労務管理など多数の分野においてAIやDX化を推進いたします。'},
+  {num:'05', name:'組織体制構築', desc:'事業フェーズに合った組織設計、役職・評価制度の整備、権限委譲の仕組み化を行います。'},
+  {num:'06', name:'マネジメント強化', desc:'現場リーダー・管理職の育成、1on1の導入、KPI設計と進捗管理の仕組みを構築します。'},
+  {num:'07', name:'業務の仕組み化・マニュアル整備', desc:'属人化している業務を誰でもできる仕組みに落とし込み、ミスと引き継ぎコストを削減します。'},
+  {num:'08', name:'人員育成・適正配置', desc:'スキルマップの作成、採用要件の明確化、人員配置最適化により、組織の底力を引き上げます。'}
+];
+const flowData = [
+  {step:'STEP 01', title:'無料ヒアリング（60分）', desc:'現状の課題、数字の状況、組織の悩みを丁寧にお聞きします。オンライン対応可能です。'},
+  {step:'STEP 02', title:'現状の分析', desc:'売上・原価・人員構成などのデータをもとに、課題の優先度と改善ポテンシャルを可視化します。'},
+  {step:'STEP 03', title:'課題に対して改善策の提案', desc:'目的、目標をしっかりと定め、ロードマップを作成し、具体的な施策をご提示いたします。'},
+  {step:'STEP 04', title:'サポート・伴走支援の実行と進捗管理', desc:'施策の実行を現場レベルで一緒に進めます。月次進捗確認と都度の軌道修正で成果を追います。'},
+  {step:'STEP 05', title:'自走化・引き継ぎ', desc:'支援終了後も御社が自力で走れるよう、仕組みと人材の定着を確認してから完了とします。'}
+];
+const aidxData = [
+  {title:'点検・報告のデジタル化', desc:'紙の点検表をアプリに移行し、リアルタイム報告・自動集計を実現。現場担当者の負担を大幅軽減。'},
+  {title:'自社アプリによる業務効率化・データ可視化', desc:'顧客管理・見積書作成・受発注業務・シフト最適化・売上管理などを自社アプリ化しインフラを整えます。'},
+  {title:'データ経営の導入', desc:'売上・原価・作業時間をリアルタイムに可視化するダッシュボードを構築。勘ではなくデータで判断。'},
+  {title:'AIを活用した業務提携', desc:'提案書や提出資料などAIを活用し大手に負けない資料作成のサポートを行います。'}
+];
+
+// ログイン
+function login() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === ADMIN_PASSWORD) {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('admin-screen').style.display = 'block';
+    loadAll();
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+  }
+}
+
+function logout() {
+  document.getElementById('admin-screen').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pw-input').value = '';
+}
+
+// パネル切り替え
+function show(id, el) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  el.classList.add('active');
+}
+
+// トースト
+function toast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg || '保存しました';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Supabase API
+async function sbGet(table, filter) {
+  const url = `${SUPABASE_URL}/rest/v1/${table}${filter || ''}`;
+  const res = await fetch(url, { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY } });
+  return res.json();
+}
+
+async function sbUpsert(table, data) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates' },
+    body: JSON.stringify(data)
+  });
+  return res.ok;
+}
+
+async function sbInsert(table, data) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}`, {
+    method: 'POST',
+    headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  return res.ok;
+}
+
+async function sbDelete(table, id) {
+  const res = await fetch(`${SUPABASE_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'DELETE',
+    headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }
+  });
+  return res.ok;
+}
+
+// 設定を読み込んでフォームに反映
+async function loadSettings() {
+  const data = await sbGet('site_settings');
+  if (!Array.isArray(data)) return;
+  data.forEach(row => {
+    const el = document.getElementById(row.id);
+    if (el) el.value = row.value;
+  });
+}
+
+// 設定を保存
+async function saveSettings(ids) {
+  const updates = ids.map(id => {
+    const el = document.getElementById(id);
+    return { id, value: el ? el.value : '' };
+  });
+  const ok = await sbUpsert('site_settings', updates);
+  if (ok) toast('保存しました');
+  else toast('保存に失敗しました');
+}
+
+// カードの初期レンダリング
+function renderProblemCards() {
+  const container = document.getElementById('problem-cards');
+  container.innerHTML = problemData.map((p, i) => `
+    <div class="form-group" style="background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:1rem;margin-bottom:0.75rem;">
+      <label class="form-label">課題${i+1} タイトル</label>
+      <input class="form-input" id="prob_title_${i}" type="text" value="${p.title}" style="margin-bottom:0.5rem;">
+      <label class="form-label">説明文</label>
+      <textarea class="form-input" id="prob_desc_${i}">${p.desc}</textarea>
+    </div>
+  `).join('');
+}
+
+function renderServiceCards() {
+  const container = document.getElementById('service-cards');
+  container.innerHTML = serviceData.map((s, i) => `
+    <div class="form-group" style="background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:1rem;margin-bottom:0.75rem;">
+      <label class="form-label">${s.num} サービス名</label>
+      <input class="form-input" id="svc_name_${i}" type="text" value="${s.name}" style="margin-bottom:0.5rem;">
+      <label class="form-label">説明文</label>
+      <textarea class="form-input" id="svc_desc_${i}">${s.desc}</textarea>
+    </div>
+  `).join('');
+}
+
+function renderFlowCards() {
+  const container = document.getElementById('flow-cards');
+  container.innerHTML = flowData.map((f, i) => `
+    <div class="form-group" style="background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:1rem;margin-bottom:0.75rem;">
+      <label class="form-label">${f.step}</label>
+      <input class="form-input" id="flow_title_${i}" type="text" value="${f.title}" style="margin-bottom:0.5rem;">
+      <label class="form-label">説明文</label>
+      <textarea class="form-input" id="flow_desc_${i}">${f.desc}</textarea>
+    </div>
+  `).join('');
+}
+
+function renderAidxCards() {
+  const container = document.getElementById('aidx-cards');
+  container.innerHTML = aidxData.map((a, i) => `
+    <div class="form-group" style="background:#fff;border:1px solid var(--gray-200);border-radius:10px;padding:1rem;margin-bottom:0.75rem;">
+      <label class="form-label">カード${i+1} タイトル</label>
+      <input class="form-input" id="aidx_title_${i}" type="text" value="${a.title}" style="margin-bottom:0.5rem;">
+      <label class="form-label">説明文</label>
+      <textarea class="form-input" id="aidx_desc_${i}">${a.desc}</textarea>
+    </div>
+  `).join('');
+}
+
+async function saveProblemCards() {
+  const updates = problemData.map((_, i) => ({
+    id: `prob_title_${i}`, value: document.getElementById(`prob_title_${i}`).value
+  })).concat(problemData.map((_, i) => ({
+    id: `prob_desc_${i}`, value: document.getElementById(`prob_desc_${i}`).value
+  })));
+  const ok = await sbUpsert('site_settings', updates);
+  if (ok) toast('課題を保存しました'); else toast('保存に失敗しました');
+}
+
+async function saveServiceCards() {
+  const updates = serviceData.map((_, i) => ({
+    id: `svc_name_${i}`, value: document.getElementById(`svc_name_${i}`).value
+  })).concat(serviceData.map((_, i) => ({
+    id: `svc_desc_${i}`, value: document.getElementById(`svc_desc_${i}`).value
+  })));
+  const ok = await sbUpsert('site_settings', updates);
+  if (ok) toast('サービスを保存しました'); else toast('保存に失敗しました');
+}
+
+async function saveFlowCards() {
+  const updates = flowData.map((_, i) => ({
+    id: `flow_title_${i}`, value: document.getElementById(`flow_title_${i}`).value
+  })).concat(flowData.map((_, i) => ({
+    id: `flow_desc_${i}`, value: document.getElementById(`flow_desc_${i}`).value
+  })));
+  const ok = await sbUpsert('site_settings', updates);
+  if (ok) toast('サポートの流れを保存しました'); else toast('保存に失敗しました');
+}
+
+async function saveAidxCards() {
+  const updates = aidxData.map((_, i) => ({
+    id: `aidx_title_${i}`, value: document.getElementById(`aidx_title_${i}`).value
+  })).concat(aidxData.map((_, i) => ({
+    id: `aidx_desc_${i}`, value: document.getElementById(`aidx_desc_${i}`).value
+  })));
+  const ok = await sbUpsert('site_settings', updates);
+  if (ok) toast('AI・DXを保存しました'); else toast('保存に失敗しました');
+}
+
+// お知らせ
+async function loadNews() {
+  const data = await sbGet('news', '?order=created_at.desc');
+  const list = document.getElementById('news-list');
+  if (!Array.isArray(data) || data.length === 0) {
+    list.innerHTML = '<div class="empty-msg">お知らせはまだありません</div>';
+    return;
+  }
+  list.innerHTML = data.map(n => `
+    <div class="item-card">
+      <div class="item-card-body">
+        <h4>${n.title}</h4>
+        <p>${n.body || ''}</p>
+        <div class="item-card-date">${new Date(n.created_at).toLocaleDateString('ja-JP')}</div>
+      </div>
+      <button class="del-btn" onclick="deleteNews(${n.id})">削除</button>
+    </div>
+  `).join('');
+}
+
+async function addNews() {
+  const title = document.getElementById('news-title').value;
+  const body = document.getElementById('news-body').value;
+  if (!title) { alert('タイトルを入力してください'); return; }
+  const ok = await sbInsert('news', { title, body });
+  if (ok) {
+    document.getElementById('news-title').value = '';
+    document.getElementById('news-body').value = '';
+    toggleForm('news-form');
+    loadNews();
+    toast('お知らせを追加しました');
+  }
+}
+
+async function deleteNews(id) {
+  if (!confirm('削除しますか？')) return;
+  const ok = await sbDelete('news', id);
+  if (ok) { loadNews(); toast('削除しました'); }
+}
+
+// コラム
+async function loadColumns() {
+  const data = await sbGet('columns', '?order=created_at.desc');
+  const list = document.getElementById('col-list');
+  if (!Array.isArray(data) || data.length === 0) {
+    list.innerHTML = '<div class="empty-msg">コラムはまだありません</div>';
+    return;
+  }
+  list.innerHTML = data.map(c => `
+    <div class="item-card">
+      <div class="item-card-body">
+        <h4>${c.title}</h4>
+        <p>${(c.body || '').slice(0, 80)}${(c.body || '').length > 80 ? '...' : ''}</p>
+        <div class="item-card-date">${new Date(c.created_at).toLocaleDateString('ja-JP')}</div>
+      </div>
+      <button class="del-btn" onclick="deleteColumn(${c.id})">削除</button>
+    </div>
+  `).join('');
+}
+
+async function addColumn() {
+  const title = document.getElementById('col-title').value;
+  const body = document.getElementById('col-body').value;
+  if (!title) { alert('タイトルを入力してください'); return; }
+  const ok = await sbInsert('columns', { title, body });
+  if (ok) {
+    document.getElementById('col-title').value = '';
+    document.getElementById('col-body').value = '';
+    toggleForm('col-form');
+    loadColumns();
+    toast('コラムを追加しました');
+  }
+}
+
+async function deleteColumn(id) {
+  if (!confirm('削除しますか？')) return;
+  const ok = await sbDelete('columns', id);
+  if (ok) { loadColumns(); toast('削除しました'); }
+}
+
+// 写真アップロード
+function uploadPhoto(input, key) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = async e => {
+    const base64 = e.target.result;
+    const ok = await sbUpsert('site_settings', [{ id: key, value: base64 }]);
+    if (ok) {
+      const previewId = key === 'prof_photo' ? 'prof-photo-preview' : 'top-photo-preview';
+      const style = key === 'prof_photo' ? 'width:80px;height:80px;object-fit:cover;border-radius:50%;' : 'width:100%;max-height:100px;object-fit:cover;border-radius:8px;';
+      document.getElementById(previewId).innerHTML = `<img src="${base64}" style="${style}">`;
+      toast('写真をアップロードしました');
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+function setColor(hex) {
+  document.getElementById('main_color').value = hex;
+  document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('sel'));
+  event.target.classList.add('sel');
+}
+
+function toggleForm(id) {
+  const f = document.getElementById(id);
+  f.classList.toggle('open');
+}
+
+async function loadAll() {
+  await loadSettings();
+  renderProblemCards();
+  renderServiceCards();
+  renderFlowCards();
+  renderAidxCards();
+  loadNews();
+  loadColumns();
+}
+
+// デフォルト値を設定
+document.getElementById('contact_email').value = 'nagata.nsup@gmail.com';
+document.getElementById('contact_title').value = 'まずは無料相談から';
+document.getElementById('contact_msg').value = '送信後、2営業日以内にご連絡いたします。';
+document.getElementById('prof_name').value = '永田　圭治';
+document.getElementById('prof_kana').value = 'ながた　けいじ';
+document.getElementById('prof_title').value = '清掃・工事・ビルメンテナンス業界専門コンサルタント';
+document.getElementById('problem_title').value = '清掃・ビルメン業界特有の経営課題';
+document.getElementById('service_title').value = '清掃・工事・ビルメン業界に特化した8つの支援';
+document.getElementById('flow_title').value = '現場を見てから戦略を描く';
+document.getElementById('aidx_title').value = '清掃・ビルメン業界のDXを加速する';
+</script>
+</body>
+</html>
