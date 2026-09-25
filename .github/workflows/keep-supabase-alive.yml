@@ -1,19 +1,18 @@
 name: Keep Supabase Alive
 
-# 毎日1回、UTC 0時(日本時間 朝9時)に自動実行されます
-# 加えて、手動で今すぐ実行したい場合は workflow_dispatch で実行可能です
+# 2日おきに自動実行。手動実行(workflow_dispatch)もできるようにしています。
 on:
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 3 */2 * *'
   workflow_dispatch:
 
 jobs:
-  ping-supabase:
+  ping:
     runs-on: ubuntu-latest
     steps:
-      - name: Ping Supabase project to prevent auto-pause
+      - name: Ping Supabase to prevent auto-pause
         run: |
-          curl -s -o /dev/null -w "%{http_code}" \
-            "${{ secrets.SUPABASE_URL }}/rest/v1/" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}"
+          curl -s -o /dev/null -w "Supabase response status: %{http_code}\n" \
+            "https://cwyyjsdsbnigysotlnph.supabase.co/rest/v1/site_settings?select=id&limit=1" \
+            -H "apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3eXlqc2RzYm5pZ3lzb3RsbnBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0ODc1NDMsImV4cCI6MjA5ODA2MzU0M30.dHeQnNhj2N5PPTs773zGU8YhlQPVIK8Sp5DEtHP7d74" \
+            -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3eXlqc2RzYm5pZ3lzb3RsbnBoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI0ODc1NDMsImV4cCI6MjA5ODA2MzU0M30.dHeQnNhj2N5PPTs773zGU8YhlQPVIK8Sp5DEtHP7d74"
