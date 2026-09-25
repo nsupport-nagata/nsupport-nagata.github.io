@@ -1327,7 +1327,9 @@ async function loadColumns() {
 
 // ページ読み込み時に実行
 window.addEventListener('DOMContentLoaded', () => {
-  loadFromSupabase();
+  // 管理画面(admin.html)からの文言上書き機能は無効化しています。
+  // トップページの内容は、このHTMLファイル自体の記述が常に正となります。
+  // loadFromSupabase();
   loadNews();
   loadColumns();
 });
