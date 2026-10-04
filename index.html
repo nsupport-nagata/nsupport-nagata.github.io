@@ -1142,6 +1142,9 @@
       });
 
       if (res.ok) {
+        if (typeof gtag === 'function') {
+  gtag('event', 'generate_lead', { form_category: category || 'none' });
+}
         btn.textContent = '✅ 送信完了！ありがとうございます。';
         btn.style.background = '#0E7C7B';
         f.reset();
